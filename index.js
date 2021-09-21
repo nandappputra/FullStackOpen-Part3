@@ -1,7 +1,7 @@
 const express = require("express")
 const app = express()
 
-let data =[
+let persons =[
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -26,18 +26,22 @@ let data =[
 
 app.get("/info", (request,response)=>{
     let a = new Date()
-    response.write(`<p>Phonebook has info for ${data.length} people<p>`)
+    response.write(`<p>Phonebook has info for ${persons.length} people<p>`)
     response.write(a.toUTCString())
     response.end()
 })
 
 app.get("/api/persons", (request,response)=>{
-    response.json(data)
+    response.json(persons)
 })
 
+
 app.get("/api/persons/:id", (request,response)=>{
+    /*
+        Returns the information of a single person
+    */
     const id = request.params.id
-    const person = data.find(person => person.id==id)
+    const person = persons.find(person => person.id==id)
     if (person){
         response.json(person)
     }
@@ -45,6 +49,13 @@ app.get("/api/persons/:id", (request,response)=>{
     else{
         response.status(404).end()
     }
+})
+
+app.delete("/api/persons/:id", (request,response)=>{
+    const id = request.params.id
+    persons = persons.filter(person => person.id != id)
+    console.log(persons)
+    response.status(204).end()
 })
 
 const PORT=3001
