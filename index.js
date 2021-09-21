@@ -24,6 +24,13 @@ let data =[
     }
 ]
 
+app.get("/info", (request,response)=>{
+    let a = new Date()
+    response.write(`<p>Phonebook has info for ${data.length} people<p>`)
+    response.write(a.toUTCString())
+    response.end()
+})
+
 app.get("/api/persons", (request,response)=>{
     response.json(data)
 })
