@@ -39,13 +39,23 @@ app.get("/api/persons", (request,response)=>{
 
 app.post("/api/persons", (request,response)=>{
     let newPerson=request.body
-    newPerson = {
-        "id":Math.floor(Math.random()*100000),
-        ...newPerson
+    if (!newPerson.name || !newPerson.number){
+        response.status(406).json({"error":"Incomplete data"})
     }
-    persons = persons.concat(newPerson)
-    console.log(persons)
-    response.json(newPerson)
+
+    else if (persons.find(person=>person.name==newPerson.name)){
+        response.status(406).json({"error":"name must be unique"})
+    }
+
+    else{
+        newPerson = {
+            "id":Math.floor(Math.random()*100000),
+            ...newPerson
+        }
+        persons = persons.concat(newPerson)
+        console.log(persons)
+        response.json(newPerson)
+    }
 })
 
 app.get("/api/persons/:id", (request,response)=>{
