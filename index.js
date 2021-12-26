@@ -83,7 +83,8 @@ app.delete("/api/persons/:id", (request,response)=>{
     response.status(204).end()
 })
 
-const PORT=3001
-app.listen(PORT,()=>{
+const host = '0.0.0.0'
+const PORT= process.env.PORT || 3001
+app.listen(PORT,host,()=>{
     console.log(`Server is listening at ${PORT}`)
 })
