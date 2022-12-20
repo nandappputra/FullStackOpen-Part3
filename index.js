@@ -50,16 +50,36 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
+const validateRequest = (entry) => {
+  const response = {
+    error: "",
+  };
+
+  if (!entry.name) {
+    return { ...response, error: "missing entry name" };
+  }
+
+  if (!entry.number) {
+    return { ...response, error: "missing entry number" };
+  }
+
+  if (persons.find((data) => data.name === entry.name)) {
+    return { ...response, error: "name must be unique" };
+  }
+
+  return response;
+};
+
 const generateId = () => {
   return Math.round(Math.random() * 1000000);
 };
 
 app.post("/api/persons", (request, response) => {
   const body = request.body;
+  const validationResult = validateRequest(body);
 
-  console.log(body);
-  if (!body) {
-    response.status(400).send("Bad request").end();
+  if (!(validationResult.error === "")) {
+    response.status(400).json(validationResult).end();
 
     return;
   }
