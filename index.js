@@ -2,7 +2,17 @@ const express = require("express");
 const morgan = require("morgan");
 const app = express();
 
-app.use(morgan("tiny"));
+morgan.token("request-content", (request, response) => {
+  const stringified = JSON.stringify(request.body);
+  return stringified === "{}" ? "" : JSON.stringify(request.body);
+});
+
+app.use(
+  morgan(
+    ":method :url :status :res[content-length] - :response-time ms :request-content"
+  )
+);
+
 app.use(express.json());
 
 let persons = [
