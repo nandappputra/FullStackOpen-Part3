@@ -28,6 +28,18 @@ app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
 
+app.get("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+
+  const person = persons.find((entry) => entry.id === id);
+
+  if (person.id) {
+    response.json(person);
+  } else {
+    response.status(400).send("no entry found");
+  }
+});
+
 app.get("/info", (request, response) => {
   response.send(`
     <p>Phonebook has info for ${persons.length} people</p>
