@@ -46,8 +46,8 @@ const addPerson = (password, name, number) => {
     .catch((err) => console.log(err));
 };
 
-if (process.argv.length == 3) {
+if (process.argv.length === 3) {
   showAllPersons(process.argv[2]);
-} else if (process.argv.length == 5) {
+} else if (process.argv.length === 5) {
   addPerson(process.argv[2], process.argv[3], process.argv[4]);
 }
