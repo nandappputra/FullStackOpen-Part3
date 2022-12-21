@@ -46,6 +46,23 @@ app.get("/api/persons/:id", (request, response, next) => {
     });
 });
 
+app.put("/api/persons/:id", (request, response, next) => {
+  const id = request.params.id;
+
+  Person.updateOne({ _id: id }, { number: request.body.number })
+    .then((result) => {
+      const updatedPerson = new Person({
+        id: id,
+        name: request.body.name,
+        number: request.body.number,
+      });
+      response.json(updatedPerson);
+    })
+    .catch((error) => {
+      next(error);
+    });
+});
+
 app.delete("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
 
