@@ -15,7 +15,7 @@ Content-Type: application/json
 
 {
     "name" : "Nan",
-    "number" : "0888888"
+    "number" : "08-88889998"
 }
 
 ###

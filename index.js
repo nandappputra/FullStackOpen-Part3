@@ -104,10 +104,22 @@ app.post("/api/persons", (request, response, next) => {
     number: body.number,
   });
 
-  person
-    .save()
+  Person.find({ name: body.name })
     .then((result) => {
-      response.json(result);
+      if (result !== {}) {
+        return response
+          .status(409)
+          .json({ error: "name already exist!" })
+          .end();
+      }
+      person
+        .save()
+        .then((result) => {
+          response.json(result);
+        })
+        .catch((error) => {
+          next(error);
+        });
     })
     .catch((error) => {
       next(error);
