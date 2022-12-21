@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+const cors = require("cors");
 const app = express();
 
 morgan.token("request-content", (request, response) => {
@@ -14,6 +15,8 @@ app.use(
 );
 
 app.use(express.json());
+app.use(cors());
+app.use(express.static("build"));
 
 let persons = [
   {
@@ -114,7 +117,7 @@ app.get("/info", (request, response) => {
     <p>${new Date().toISOString()}</p>`);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Application is running at ${PORT}`);
 });
