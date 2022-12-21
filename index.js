@@ -21,29 +21,41 @@ app.use(express.json());
 app.use(requestLogger);
 
 app.get("/api/persons", (request, response, next) => {
-  Person.find({}).then((persons) => {
-    response.json(persons);
-  });
+  Person.find({})
+    .then((persons) => {
+      response.json(persons);
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
 app.get("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
 
-  const person = persons.find((entry) => entry.id === id);
-
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(400).send("no entry found");
-  }
+  Person.find({ _id: id })
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(400).send("no entry found");
+      }
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
 app.delete("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
 
-  Person.deleteOne({ _id: id }).then((result) => {
-    response.status(204).end();
-  });
+  Person.deleteOne({ _id: id })
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
 const validateRequest = (entry) => {
@@ -75,9 +87,14 @@ app.post("/api/persons", (request, response, next) => {
     number: body.number,
   });
 
-  person.save().then((result) => {
-    response.json(result);
-  });
+  person
+    .save()
+    .then((result) => {
+      response.json(result);
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
 app.get("/info", (request, response, next) => {
