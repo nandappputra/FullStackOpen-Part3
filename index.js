@@ -4,30 +4,30 @@ const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
 const Person = require("./models/person");
+const { response } = require("express");
 
 morgan.token("request-content", (request, response) => {
   const stringified = JSON.stringify(request.body);
   return stringified === "{}" ? "" : JSON.stringify(request.body);
 });
 
-app.use(
-  morgan(
-    ":method :url :status :res[content-length] - :response-time ms :request-content"
-  )
+const requestLogger = morgan(
+  ":method :url :status :res[content-length] - :response-time ms :request-content"
 );
 
-app.use(express.json());
 app.use(cors());
 app.use(express.static("build"));
+app.use(express.json());
+app.use(requestLogger);
 
-app.get("/api/persons", (request, response) => {
+app.get("/api/persons", (request, response, next) => {
   Person.find({}).then((persons) => {
     response.json(persons);
   });
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
+app.get("/api/persons/:id", (request, response, next) => {
+  const id = request.params.id;
 
   const person = persons.find((entry) => entry.id === id);
 
@@ -38,12 +38,12 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
+app.delete("/api/persons/:id", (request, response, next) => {
+  const id = request.params.id;
 
-  persons = persons.filter((entry) => entry.id !== id);
-
-  response.status(204).end();
+  Person.deleteOne({ _id: id }).then((result) => {
+    response.status(204).end();
+  });
 });
 
 const validateRequest = (entry) => {
@@ -62,7 +62,7 @@ const validateRequest = (entry) => {
   return response;
 };
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body;
   const validationResult = validateRequest(body);
 
@@ -80,12 +80,30 @@ app.post("/api/persons", (request, response) => {
   });
 });
 
-app.get("/info", (request, response) => {
+app.get("/info", (request, response, next) => {
   response.send(`
     <p>Phonebook has info for ${persons.length} people</p>
     <br>
     <p>${new Date().toISOString()}</p>`);
 });
+
+const unknownEndPoint = (request, response) => {
+  response.status(404).send({ error: "Unknown endpoint" });
+};
+
+app.use(unknownEndPoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformed id" });
+  }
+
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
