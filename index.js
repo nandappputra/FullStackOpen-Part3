@@ -1,7 +1,9 @@
+require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
+const Person = require("./models/person");
 
 morgan.token("request-content", (request, response) => {
   const stringified = JSON.stringify(request.body);
@@ -18,31 +20,10 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static("build"));
 
-let persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
-
 app.get("/api/persons", (request, response) => {
-  response.json(persons);
+  Person.find({}).then((persons) => {
+    response.json(persons);
+  });
 });
 
 app.get("/api/persons/:id", (request, response) => {
@@ -78,15 +59,7 @@ const validateRequest = (entry) => {
     return { ...response, error: "missing entry number" };
   }
 
-  if (persons.find((data) => data.name === entry.name)) {
-    return { ...response, error: "name must be unique" };
-  }
-
   return response;
-};
-
-const generateId = () => {
-  return Math.round(Math.random() * 1000000);
 };
 
 app.post("/api/persons", (request, response) => {
@@ -94,20 +67,17 @@ app.post("/api/persons", (request, response) => {
   const validationResult = validateRequest(body);
 
   if (!(validationResult.error === "")) {
-    response.status(400).json(validationResult).end();
-
-    return;
+    return response.status(400).json(validationResult).end();
   }
 
-  const newPerson = {
-    id: generateId(),
+  const person = new Person({
     name: body.name,
     number: body.number,
-  };
+  });
 
-  persons = persons.concat(newPerson);
-
-  response.json(newPerson);
+  person.save().then((result) => {
+    response.json(result);
+  });
 });
 
 app.get("/info", (request, response) => {
@@ -117,7 +87,7 @@ app.get("/info", (request, response) => {
     <p>${new Date().toISOString()}</p>`);
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Application is running at ${PORT}`);
 });
